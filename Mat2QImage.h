@@ -5,7 +5,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-inline QImage Mat2QImage(cv::Mat image)
+inline QImage Mat2QImage(const cv::Mat & image)
 {
 //    assert(image.channels()==3);
     QImage ans;
@@ -21,7 +21,7 @@ inline QImage Mat2QImage(cv::Mat image)
     return ans;
 }
 
-inline cv::Mat QImage2Mat(QImage image)
+inline cv::Mat QImage2Mat(const QImage &image)
 {
     cv::Mat ans;
     switch(image.format())
@@ -35,6 +35,13 @@ inline cv::Mat QImage2Mat(QImage image)
         cv::split(tmp, &channels[0]);
         channels.pop_back();
         cv::merge(channels, ans);
+        break;
+    }
+    case QImage::Format_RGB888:
+    {
+        cv::Mat tmp(image.height(), image.width(), CV_8UC3, (uchar*)image.bits(), image.bytesPerLine());
+        ans = tmp.clone();
+        cv::cvtColor(ans, ans, CV_BGR2RGB);
         break;
     }
 
