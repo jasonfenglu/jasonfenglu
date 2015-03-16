@@ -23,10 +23,26 @@ inline QImage Mat2QImage(cv::Mat image)
 
 inline cv::Mat QImage2Mat(QImage image)
 {
-    cv::Mat tmp(image.height(), image.width(), CV_8UC3, (uchar*)image.bits(), image.bytesPerLine());
-    cv::Mat result;
-    cv::cvtColor(tmp, result, CV_BGR2RGB);
-    return result;
+    cv::Mat ans;
+    switch(image.format())
+    {
+    case QImage::Format_RGB32:
+    {
+        /// The image is stored using a 32-bit RGB format (0xffRRGGBB).
+        /// Remove the first channel
+        cv::Mat tmp(image.height(), image.width(), CV_8UC4, (uchar*)image.bits(), image.bytesPerLine());
+        std::vector<cv::Mat> channels(4);
+        cv::split(tmp, &channels[0]);
+        channels.pop_back();
+        cv::merge(channels, ans);
+        break;
+    }
+
+    default:
+        qFatal("Format not implemented");
+    }
+
+    return ans;
 }
 
 #endif // MAT2QIMAGE_H
